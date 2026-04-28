@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Intelligence — OpportunityTracker</title>
+  <meta name="description" content="Upload your resume for AI-powered skill extraction, ATS scoring, and job matching.">
+  <link rel="stylesheet" href="css/styles.css?v=2">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <style>
+    /* ── Cinematic Scan Overlay ───────────────────────── */
+    .scan-overlay {
+      position: fixed; inset: 0; z-index: 900;
+      background: rgba(15,23,42,0.82);
+      backdrop-filter: blur(18px) saturate(0.4);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 32px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+    .scan-overlay.active { opacity: 1; pointer-events: all; }
+
+    /* Resume skeleton */
+    .resume-skeleton {
+      position: relative;
+      width: 480px; max-width: 90vw;
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid rgba(255,255,255,0.13);
+      border-radius: 14px;
+      padding: 36px 40px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
+      animation: skeletonFloat 3s ease-in-out infinite;
+      overflow: hidden;
+    }
+    .skeleton-line {
+      height: 10px; border-radius: 6px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.08) 75%);
+      background-size: 400% 100%;
+      animation: skeletonShimmer 1.8s linear infinite;
+      margin-bottom: 12px;
+    }
+    .skeleton-line.name   { width: 55%; height: 18px; margin-bottom: 8px; }
+    .skeleton-line.sub    { width: 38%; height: 10px; opacity: 0.6; margin-bottom: 24px; }
+    .skeleton-line.sec    { width: 28%; height: 12px; background: rgba(99,179,237,0.3); margin-bottom: 10px; }
+    .skeleton-line.long   { width: 100%; }
+    .skeleton-line.med    { width: 78%; }
+    .skeleton-line.short  { width: 55%; }
+    .skeleton-line.xshort { width: 38%; }
+    .skeleton-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 18px 0; }
+    .skeleton-row { display: flex; gap: 10px; }
+    .skeleton-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(99,179,237,0.5); flex-shrink: 0; margin-top: 3px; }
+
+    /* ── JS-driven SVG Magnifier ─── */
+    /* Wrapper sits absolute on skeleton, moved by JS */
+    .magnifier-wrap {
+      position: absolute;
+      width: 110px; height: 130px; /* extra height for handle */
+      pointer-events: none;
+      z-index: 20;
+      /* transform set by JS */
+    }
+    /* Circular clip that shows zoomed content */
+    .lens-clip {
+      position: absolute;
+      top: 0; left: 0;
+      width: 96px; height: 96px;
+      border-radius: 50%;
+      overflow: hidden;
+      /* isolate so the zoom clone stays inside */
+    }
+    /* Cloned skeleton content scaled inside the lens */
+    .lens-clone {
+      position: absolute;
+      /* width/height set by JS to match skeleton size */
+      transform-origin: 0 0;
+      /* transform: translate + scale set by JS */
+      pointer-events: none;
+    }
+    /* SVG magnifier frame drawn on top */
+    .magnifier-svg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 110px; height: 130px;
+      overflow: visible;
+    }
+
+
+
+    /* Scan status below skeleton */
+    .scan-overlay-status {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+    }
+    .scan-step-text {
+      font-size: 15px; font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      letter-spacing: -0.01em;
+    }
+    .scan-sub-text { font-size: 13px; color: rgba(255,255,255,0.45); }
+    .scan-progress-track {
+      width: 340px; max-width: 85vw; height: 4px;
+      background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;
+    }
+    .scan-progress-fill {
+      height: 100%; width: 0; border-radius: 2px;
+      background: linear-gradient(90deg, #3b82f6, #60a5fa, #93c5fd);
+      background-size: 200% auto;
+      animation: shimmer 1.4s linear infinite;
+      transition: width 0.6s ease;
+    }
+
+    /* ── ATS Score Card ───────────────────────────────── */
+    .ats-score-card {
+      background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-medium) 100%);
+      border-radius: var(--radius-xl);
+      padding: 28px 28px 24px;
+      display: grid; grid-template-columns: auto 1fr; gap: 24px;
+      align-items: center; margin-bottom: 16px;
+      box-shadow: var(--shadow-btn);
+      animation: springIn 0.6s var(--spring);
+    }
+    .ats-ring-wrap {
+      position: relative; flex-shrink: 0;
+    }
+    .ats-ring-svg { width: 108px; height: 108px; transform: rotate(-90deg); }
+    .ats-ring-bg   { fill: none; stroke: rgba(255,255,255,0.15); stroke-width: 8; }
+    .ats-ring-fill { fill: none; stroke: white;  stroke-width: 8; stroke-linecap: round;
+                     transition: stroke-dashoffset 1.4s var(--spring); }
+    .ats-ring-score {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .ats-score-num { font-size: 28px; font-weight: 900; color: white; letter-spacing: -0.03em; line-height: 1; }
+    .ats-score-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.65); letter-spacing: 0.07em; }
+    .ats-score-info { color: white; }
+    .ats-score-info h3 { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+    .ats-score-info p  { font-size: 12.5px; color: rgba(255,255,255,0.7); margin-bottom: 14px; }
+    .ats-tier {
+      display: inline-block;
+      padding: 3px 12px; border-radius: 9999px;
+      font-size: 11px; font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+    .ats-tier.excellent { background: rgba(5,150,105,0.9); color: white; }
+    .ats-tier.good      { background: rgba(16,185,129,0.8); color: white; }
+    .ats-tier.average   { background: rgba(217,119,6,0.9);  color: white; }
+    .ats-tier.weak      { background: rgba(220,38,38,0.85); color: white; }
+
+    /* ATS Feedback List */
+    .ats-feedback-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .ats-fb-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 14px; border-radius: var(--radius-md);
+      font-size: 13px; font-weight: 500; line-height: 1.5;
+      animation: springIn 0.5s var(--spring) both;
+    }
+    .ats-fb-item.good { background: var(--emerald-soft); color: var(--emerald); }
+    .ats-fb-item.bad  { background: #fef3c7; color: #92400e; }
+    .ats-fb-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── Section Headings styling  ───────────────────── */
+    .section-heading {
+      font-size: 13px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--text-muted); margin: 24px 0 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    @keyframes skeletonFloat {
+      0%,100% { transform: translateY(0px); }
+      50%      { transform: translateY(-8px); }
+    }
+    @keyframes skeletonShimmer {
+      0%   { background-position: 200% center; }
+      100% { background-position: -200% center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Cinematic Scan Overlay ─────────────────────────────────────────────── -->
+<div class="scan-overlay" id="scan-overlay">
+  <div class="resume-skeleton" id="skeleton">
+
+    <!-- 1. Static skeleton content (source of truth for zoom clone) -->
+    <div id="skeleton-content">
+      <div class="skeleton-line name"></div>
+      <div class="skeleton-line sub"></div>
+      <div class="skeleton-line sec"></div>
+      <div class="skeleton-line long"></div>
+      <div class="skeleton-line med"></div>
+      <div class="skeleton-line short"></div>
+      <div class="skeleton-divider"></div>
+      <div class="skeleton-line sec"></div>
+      <div class="skeleton-row" style="margin-bottom:10px"><div class="skeleton-dot"></div><div class="skeleton-line long" style="margin-bottom:0;flex:1"></div></div>
+      <div class="skeleton-row" style="margin-bottom:10px"><div class="skeleton-dot"></div><div class="skeleton-line med" style="margin-bottom:0;flex:1"></div></div>
+      <div class="skeleton-row" style="margin-bottom:10px"><div class="skeleton-dot"></div><div class="skeleton-line short" style="margin-bottom:0;flex:1"></div></div>
+      <div class="skeleton-divider"></div>
+      <div class="skeleton-line sec"></div>
+      <div class="skeleton-row" style="margin-bottom:10px"><div class="skeleton-dot"></div><div class="skeleton-line long" style="margin-bottom:0;flex:1"></div></div>
+      <div class="skeleton-row" style="margin-bottom:10px"><div class="skeleton-dot"></div><div class="skeleton-line xshort" style="margin-bottom:0;flex:1"></div></div>
+      <div class="skeleton-divider"></div>
+      <div class="skeleton-line sec"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">
+        <div style="width:60px;height:22px;border-radius:50px;background:rgba(59,130,246,0.25);"></div>
+        <div style="width:78px;height:22px;border-radius:50px;background:rgba(59,130,246,0.18);"></div>
+        <div style="width:52px;height:22px;border-radius:50px;background:rgba(59,130,246,0.22);"></div>
+        <div style="width:66px;height:22px;border-radius:50px;background:rgba(59,130,246,0.2);"></div>
+      </div>
+    </div>
+
+
+
+    <!-- 3. Magnifier: lens-clip (zoomed) + SVG frame + handle -->
+    <div class="magnifier-wrap" id="magnifier-wrap">
+      <!-- Circular zoom window -->
+      <div class="lens-clip" id="lens-clip">
+        <!-- Clone of skeleton content, scaled and offset by JS -->
+        <div class="lens-clone" id="lens-clone"></div>
+      </div>
+      <!-- SVG: proper glass ring, specular glint, solid handle -->
+      <svg class="magnifier-svg" viewBox="0 0 110 130" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="lensGrad" cx="34%" cy="30%" r="65%">
+            <stop offset="0%"   stop-color="rgba(255,255,255,0.22)"/>
+            <stop offset="60%"  stop-color="rgba(59,130,246,0.06)"/>
+            <stop offset="100%" stop-color="rgba(29,78,216,0.12)"/>
+          </radialGradient>
+          <radialGradient id="rimGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="70%" stop-color="rgba(59,130,246,0)"/>
+            <stop offset="100%" stop-color="rgba(59,130,246,0.18)"/>
+          </radialGradient>
+          <filter id="glowFilter">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <!-- Outer glow ring -->
+        <circle cx="48" cy="48" r="47" fill="none"
+          stroke="rgba(59,130,246,0.25)" stroke-width="6"
+          filter="url(#glowFilter)"/>
+        <!-- Lens glass fill -->
+        <circle cx="48" cy="48" r="44" fill="url(#lensGrad)"/>
+        <!-- Inner rim vignette -->
+        <circle cx="48" cy="48" r="44" fill="url(#rimGrad)"/>
+        <!-- Bold rim ring -->
+        <circle cx="48" cy="48" r="44" fill="none"
+          stroke="rgba(59,130,246,0.88)" stroke-width="4"/>
+        <!-- Handle: thick rounded line from bottom-right of lens -->
+        <line x1="82" y1="82" x2="104" y2="122"
+          stroke="rgba(37,99,235,0.9)" stroke-width="10"
+          stroke-linecap="round"
+          filter="url(#glowFilter)"/>
+        <!-- Handle inner lighter stripe for depth -->
+        <line x1="83" y1="82" x2="104" y2="120"
+          stroke="rgba(147,197,253,0.5)" stroke-width="3"
+          stroke-linecap="round"/>
+      </svg>
+    </div>
+
+  </div>
+  <div class="scan-overlay-status">
+    <div class="scan-step-text" id="overlay-step">Parsing PDF structure...</div>
+    <div class="scan-sub-text" id="overlay-sub">Extracting raw text from all pages</div>
+    <div class="scan-progress-track"><div class="scan-progress-fill" id="overlay-progress"></div></div>
+  </div>
+</div>
+
+<!-- ── App Layout ─────────────────────────────────────────────────────────── -->
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-row">
+        <div class="logo-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>
+          </svg>
+        </div>
+        <div><h2>OpportunityTracker</h2><span>v2.0 · University Platform</span></div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a class="nav-item" href="index.html#dashboard"><i data-lucide="layout-dashboard" width="15" height="15"></i> Dashboard</a>
+      <a class="nav-item" href="index.html#opportunities"><i data-lucide="briefcase" width="15" height="15"></i> Opportunities</a>
+      <a class="nav-item active" href="resume.html"><i data-lucide="file-text" width="15" height="15"></i> Resume</a>
+      <a class="nav-item" href="bookmarks.html"><i data-lucide="bookmark" width="15" height="15"></i> Bookmarks</a>
+      <div class="nav-section-label">Insights</div>
+      <a class="nav-item" href="index.html#analytics"><i data-lucide="bar-chart-2" width="15" height="15"></i> Analytics</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar">DC</div>
+        <div class="user-info"><p>Dept. Coordinator</p><span>CSE · 2025–26</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="view active">
+      <div class="page-header">
+        <h1>Resume Intelligence</h1>
+        <p>Upload your CV — extract skills, compute your ATS health score, and compare with real job requirements.</p>
+      </div>
+
+      <div style="max-width:700px;margin:0 auto">
+
+        <!-- Upload Zone -->
+        <div class="upload-zone" id="upload-zone"
+          onclick="triggerUpload()"
+          ondragover="onDragOver(event)"
+          ondragleave="onDragLeave(event)"
+          ondrop="onDrop(event)">
+          <div style="position:relative;width:72px;height:72px;display:flex;align-items:center;justify-content:center">
+            <i data-lucide="file-text" width="52" height="52" style="color:var(--blue)"></i>
+          </div>
+          <div class="upload-title">Drag &amp; drop your resume here</div>
+          <div class="upload-sub">Supports PDF, DOCX, TXT · Real text extraction via PDF.js</div>
+          <button class="upload-btn" id="upload-btn" onclick="event.stopPropagation();triggerUpload()">
+            <i data-lucide="upload" width="14" height="14"></i> Upload Resume
+          </button>
+          <input type="file" id="file-input" accept=".pdf,.doc,.docx,.txt" style="display:none" onchange="handleFile(this.files[0])">
+        </div>
+
+        <!-- Error banner -->
+        <div id="analysis-error" style="display:none;margin-top:12px;padding:12px 16px;background:var(--rose-soft);border:1px solid rgba(225,29,72,0.2);border-radius:var(--radius-lg);font-size:13px;color:var(--rose);font-weight:600"></div>
+
+        <!-- ATS Score Card (hidden until analyzed) -->
+        <div id="ats-section" style="display:none;margin-top:20px">
+          <div class="ats-score-card" id="ats-score-card">
+            <div class="ats-ring-wrap">
+              <svg class="ats-ring-svg" viewBox="0 0 120 120">
+                <circle class="ats-ring-bg"   cx="60" cy="60" r="46"/>
+                <circle class="ats-ring-fill" id="ats-ring-fill" cx="60" cy="60" r="46"
+                  stroke-dasharray="289.03" stroke-dashoffset="289.03"/>
+              </svg>
+              <div class="ats-ring-score">
+                <div class="ats-score-num" id="ats-num">0</div>
+                <div class="ats-score-label">ATS SCORE</div>
+              </div>
+            </div>
+            <div class="ats-score-info">
+              <h3 id="ats-headline">Analyzing...</h3>
+              <p id="ats-sub">Your resume is being evaluated against ATS heuristics.</p>
+              <span class="ats-tier" id="ats-tier">—</span>
+            </div>
+          </div>
+          <!-- Feedback bullets -->
+          <div class="ats-feedback-list" id="ats-feedback"></div>
+        </div>
+
+        <!-- Extracted Skills -->
+        <div class="card extracted-section mt-24" id="extracted-section" style="padding:22px 24px">
+          <div class="section-heading">
+            <i data-lucide="cpu" width="15" height="15" style="color:var(--blue)"></i>
+            Extracted Competencies
+          </div>
+          <div class="skills-cloud" id="skills-cloud"></div>
+
+          <div class="match-notice-banner" id="match-notice">
+            <i data-lucide="sparkles" width="16" height="16"></i>
+            <span id="match-notice-text">Computing matches...</span>
+          </div>
+
+          <a href="index.html#opportunities" class="upload-btn" style="display:inline-flex;text-decoration:none;margin-top:0">
+            <i data-lucide="arrow-right" width="14" height="14"></i>
+            View Matching Opportunities
+          </a>
+        </div>
+
+        <!-- Top Matched Jobs -->
+        <div id="match-results-section" style="display:none;margin-top:16px">
+          <div class="section-heading">
+            <i data-lucide="target" width="15" height="15" style="color:var(--violet)"></i>
+            Top Matching Internships
+          </div>
+          <div class="match-results-grid" id="match-results-grid"></div>
+        </div>
+
+        <!-- Upload History -->
+        <div class="card mt-24" style="padding:20px 24px;margin-top:16px">
+          <div class="section-heading" style="margin-top:0">
+            <i data-lucide="history" width="15" height="15" style="color:var(--blue)"></i>
+            Upload History
+          </div>
+          <div id="history-list">
+            <div class="history-item">
+              <div class="file-icon"><i data-lucide="file" width="15" height="15"></i></div>
+              <div style="flex:1;min-width:0">
+                <div class="history-name">Resume_Final_v3.pdf</div>
+                <div class="history-meta">Analyzed 2 days ago · 1.4MB</div>
+              </div>
+              <div style="display:flex;gap:5px">
+                <span class="skill-tag" style="font-size:10.5px;padding:2px 8px">Python</span>
+                <span class="skill-tag" style="font-size:10.5px;padding:2px 8px">React</span>
+              </div>
+              <span class="badge badge-emerald" style="flex-shrink:0">Active</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><div class="toast-dot" id="toast-dot"></div><span id="toast-msg">Done</span></div>
+
+<script src="js/db.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+  lucide.createIcons();
+  DB.getResumeSkills().then(data => {
+    if (data && data.skills && data.skills.length > 0) {
+      showExtracted(data.skills);
+      if (data.atsScore !== undefined) showATSScore(data.atsScore, data.atsFeedback);
+      computeAndShowMatches(data);
+    }
+  });
+});
+
+function triggerUpload() { document.getElementById('file-input').click(); }
+function onDragOver(e)  { e.preventDefault(); document.getElementById('upload-zone').classList.add('drag-over'); }
+function onDragLeave(e) { document.getElementById('upload-zone').classList.remove('drag-over'); }
+function onDrop(e)      { e.preventDefault(); document.getElementById('upload-zone').classList.remove('drag-over'); const f=e.dataTransfer.files[0]; if(f) handleFile(f); }
+
+// ─── Overlay helpers ─────────────────────────────────────────────────────────
+const SCAN_STEPS = [
+  { pct:'15%', main:'Parsing PDF structure...',       sub:'Extracting raw text from all pages' },
+  { pct:'32%', main:'Identifying text blocks...',     sub:'Running optical character detection' },
+  { pct:'50%', main:'Extracting skill keywords...',   sub:'Matching against 93-entry tech dictionary' },
+  { pct:'68%', main:'Running ATS heuristics...',      sub:'Evaluating 6 scoring dimensions' },
+  { pct:'84%', main:'Scoring against job pool...',    sub:'Ranking 60+ opportunities by match %' },
+  { pct:'97%', main:'Finalizing intelligence...',     sub:'Preparing your personalized report' },
+];
+
+function setOverlayStep(idx) {
+  const s = SCAN_STEPS[idx] || SCAN_STEPS[SCAN_STEPS.length-1];
+  document.getElementById('overlay-step').textContent = s.main;
+  document.getElementById('overlay-sub').textContent  = s.sub;
+  document.getElementById('overlay-progress').style.width = s.pct;
+}
+
+async function processFile(file) {
+  if (!file) return;
+  document.getElementById('analysis-error').style.display = 'none';
+  document.getElementById('upload-btn').textContent = '⏳ Analyzing...';
+
+  // Launch overlay
+  const overlay = document.getElementById('scan-overlay');
+  overlay.classList.add('active');
+  setOverlayStep(0);
+  // Start magnifier after layout settles
+  setTimeout(initMagnifier, 80);
+
+  try {
+    let extractedText = '';
+    await sleep(400); setOverlayStep(1);
+
+    if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+      extractedText = await extractPDF(file);
+    } else {
+      extractedText = await readAsText(file);
+    }
+
+    await sleep(500); setOverlayStep(2);
+    if (!extractedText || extractedText.trim().length < 30) {
+      throw new Error('Could not extract sufficient text. Try a text-based PDF or .txt file.');
+    }
+
+    const skills = extractSkillsFromText(extractedText);
+    await sleep(600); setOverlayStep(3);
+
+    const { score: atsScore, feedback: atsFeedback } = computeATSScore(extractedText);
+    await sleep(600); setOverlayStep(4);
+
+    await sleep(500); setOverlayStep(5);
+    await sleep(500);
+
+    // Done — close overlay
+    stopMagnifier();
+    overlay.classList.remove('active');
+
+    await DB.setResumeSkills({ text: extractedText, skills, filename: file.name, analyzedAt: Date.now(), atsScore, atsFeedback });
+
+    document.getElementById('upload-btn').innerHTML = '<i data-lucide="check" width="14" height="14"></i> Analyzed!';
+    setTimeout(()=>{ document.getElementById('upload-btn').innerHTML = '<i data-lucide="upload" width="14" height="14"></i> Upload Another'; lucide.createIcons(); }, 2000);
+    lucide.createIcons();
+
+    showATSScore(atsScore, atsFeedback);
+    showExtracted(skills);
+    await computeAndShowMatches({ text: extractedText, skills });
+    addHistoryEntry(file.name, skills, atsScore);
+    showToast(`✅ Resume analyzed — ATS Score: ${atsScore}/100`);
+
+  } catch(err) {
+    stopMagnifier();
+    overlay.classList.remove('active');
+    document.getElementById('upload-btn').innerHTML = '<i data-lucide="upload" width="14" height="14"></i> Upload Resume';
+    lucide.createIcons();
+    document.getElementById('analysis-error').textContent = '⚠️ ' + err.message;
+    document.getElementById('analysis-error').style.display = 'block';
+  }
+}
+
+async function handleFile(file) { return processFile(file); }
+
+// ─── PDF Extraction ──────────────────────────────────────────────────────────
+async function extractPDF(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let text = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page    = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += content.items.map(item => item.str).join(' ') + '\n';
+  }
+  return text;
+}
+function readAsText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result || '');
+    reader.onerror = () => reject(new Error('Failed to read file.'));
+    reader.readAsText(file);
+  });
+}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ─── Skill Extractor ─────────────────────────────────────────────────────────
+const SKILL_DICTIONARY = [
+  'Python','Java','JavaScript','TypeScript','C','C++','Go','Rust','Swift','Kotlin','Dart','Scala','Ruby','R','MATLAB','Bash','PHP',
+  'React','Next.js','Angular','Vue.js','HTML','CSS','Node.js','Express','FastAPI','Django','Flask','Spring Boot','GraphQL','REST API','WebGL','WebAssembly','Electron',
+  'Flutter','React Native','SwiftUI','UIKit','Android','iOS','AppKit',
+  'TensorFlow','PyTorch','Keras','JAX','Scikit-learn','NumPy','Pandas','Machine Learning','Deep Learning','NLP','Computer Vision','LLMs','RLHF','CUDA','TensorRT','Transformers','ONNX',
+  'SQL','PostgreSQL','MySQL','MongoDB','Redis','Kafka','Apache Spark','Hadoop','Airflow','dbt','ClickHouse','Elasticsearch','Vitess','BigQuery','Snowflake',
+  'AWS','Azure','GCP','Docker','Kubernetes','Terraform','CI/CD','GitHub Actions','HCL','Prometheus','Grafana','Linux','Nginx','gRPC',
+  'Git','GitHub','Figma','Jira','Notion','Postman',
+  'Data Structures','Algorithms','System Design','OOP','Microservices','Distributed Systems','Networking','Operating Systems','Cloud Computing',
+];
+function extractSkillsFromText(text) {
+  const lower = text.toLowerCase();
+  return SKILL_DICTIONARY.filter(skill => lower.includes(skill.toLowerCase()));
+}
+
+// ─── ATS Score Display ────────────────────────────────────────────────────────
+function showATSScore(score, feedback) {
+  document.getElementById('ats-section').style.display = 'block';
+
+  // Ring animation — circumference = 2π×46 ≈ 289.03
+  const circumference = 289.03;
+  const offset = circumference - (score / 100) * circumference;
+  setTimeout(() => {
+    document.getElementById('ats-ring-fill').style.strokeDashoffset = offset;
+  }, 200);
+
+  // Count-up number
+  let current = 0;
+  const target = score;
+  const step = () => {
+    current += Math.ceil((target - current) / 8) || 1;
+    if (current >= target) current = target;
+    document.getElementById('ats-num').textContent = current;
+    if (current < target) requestAnimationFrame(step);
+  };
+  setTimeout(step, 250);
+
+  // Tier & headline
+  let tier, headline, sub, tierClass;
+  if (score >= 85)      { tier='Excellent'; tierClass='excellent'; headline='ATS-Ready Resume'; sub='Your resume is very likely to pass automated screening systems.'; }
+  else if (score >= 70) { tier='Good';      tierClass='good';      headline='Strong Foundation'; sub='Minor improvements could push you to the top of the shortlist.'; }
+  else if (score >= 50) { tier='Average';   tierClass='average';   headline='Needs Improvement'; sub='Several areas need attention before applying to competitive roles.'; }
+  else                  { tier='Weak';      tierClass='weak';       headline='Resume Needs Work'; sub='Follow the feedback below to significantly boost your ATS score.'; }
+
+  document.getElementById('ats-headline').textContent = headline;
+  document.getElementById('ats-sub').textContent = sub;
+  const tierEl = document.getElementById('ats-tier');
+  tierEl.textContent = tier; tierEl.className = `ats-tier ${tierClass}`;
+
+  // Feedback bullets
+  const fbList = document.getElementById('ats-feedback');
+  fbList.innerHTML = '';
+  (feedback || []).forEach((item, i) => {
+    const el = document.createElement('div');
+    el.className = `ats-fb-item ${item.ok ? 'good' : 'bad'}`;
+    el.style.animationDelay = (i * 80) + 'ms';
+    el.innerHTML = `<span class="ats-fb-icon">${item.ok ? '✅' : '⚠️'}</span><span>${item.msg}</span>`;
+    fbList.appendChild(el);
+  });
+}
+
+// ─── Show Extracted Skills ────────────────────────────────────────────────────
+function showExtracted(skills) {
+  const cloud = document.getElementById('skills-cloud');
+  cloud.innerHTML = '';
+  skills.forEach((skill, i) => {
+    const tag = document.createElement('span');
+    tag.className = 'skill-tag';
+    tag.textContent = skill;
+    tag.style.animation = `springIn 0.45s var(--spring) ${i * 35}ms both`;
+    cloud.appendChild(tag);
+  });
+  document.getElementById('extracted-section').classList.add('visible');
+  lucide.createIcons();
+}
+
+// ─── Compute & Show Matches ───────────────────────────────────────────────────
+async function computeAndShowMatches(resumeData) {
+  const scored = MASTER_JOB_POOL.map(job => ({
+    ...job, _score: computeMatchScore(resumeData.text, job).score
+  })).sort((a,b) => b._score - a._score);
+
+  const top10 = scored.slice(0, 10);
+  const matchCount = scored.filter(j => j._score >= 70).length;
+
+  document.getElementById('match-notice-text').textContent =
+    `${matchCount} opportunities match ≥70% · Top match: ${scored[0]?.company} (${scored[0]?._score}%)`;
+
+  const grid = document.getElementById('match-results-grid');
+  grid.innerHTML = '';
+  top10.forEach((job, i) => {
+    const card = document.createElement('div');
+    card.className = 'match-result-card';
+    card.style.animationDelay = (i * 55) + 'ms';
+    const sc = job._score >= 75 ? 'score-high' : job._score >= 55 ? 'score-mid' : 'score-low';
+    card.innerHTML = `
+      <div class="match-score-circle ${sc}">${job._score}%</div>
+      <div class="match-result-info">
+        <div class="match-result-role">${job.role}</div>
+        <div class="match-result-company">${job.company} · ${job.salary}</div>
+        <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px">
+          ${(job.skills||[]).slice(0,3).map(s=>`<span class="skill-tag" style="font-size:10px;padding:2px 7px">${s}</span>`).join('')}
+        </div>
+      </div>
+      <i data-lucide="arrow-right" width="14" height="14" style="color:var(--blue-medium);flex-shrink:0"></i>`;
+    card.onclick = () => { window.location.href = 'index.html#opportunities'; };
+    grid.appendChild(card);
+  });
+
+  document.getElementById('match-results-section').style.display = 'block';
+  lucide.createIcons();
+}
+
+// ─── History Entry ────────────────────────────────────────────────────────────
+function addHistoryEntry(filename, skills, ats) {
+  const list = document.getElementById('history-list');
+  const item = document.createElement('div');
+  item.className = 'history-item';
+  item.style.animation = 'springIn 0.5s var(--spring) forwards';
+  item.innerHTML = `
+    <div class="file-icon"><i data-lucide="file" width="15" height="15"></i></div>
+    <div style="flex:1;min-width:0">
+      <div class="history-name">${filename}</div>
+      <div class="history-meta">Just analyzed · ${skills.length} skills · ATS: ${ats}/100</div>
+    </div>
+    ${skills.slice(0,2).map(s=>`<span class="skill-tag" style="font-size:10.5px;padding:2px 8px">${s}</span>`).join('')}
+    <span class="badge badge-emerald" style="flex-shrink:0">Active</span>`;
+  list.insertBefore(item, list.firstChild);
+  lucide.createIcons();
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('visible');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('visible'), 3200);
+}
+
+// ─── Magnifier RAF Engine ─────────────────────────────────────────────────────
+const LENS_R   = 48;   // lens radius in px
+const ZOOM     = 1.85; // magnification factor
+const LERP_SPD = 0.025; // interpolation speed
+
+let magX = 200, magY = 100;
+let targetX = 200, targetY = 100;
+let dwellFrames = 0;
+let magRAF = null;
+let cloneReady = false;
+
+function pickRandomTarget() {
+  // Skeleton readable area is roughly X: 40-360, Y: 30-380
+  targetX = 40 + Math.random() * 300; 
+  targetY = 30 + Math.random() * 340;
+}
+
+function initMagnifier() {
+  const skeleton = document.getElementById('skeleton');
+  const content  = document.getElementById('skeleton-content');
+  const clone    = document.getElementById('lens-clone');
+
+  // Clone the content HTML into the zoom layer
+  clone.innerHTML = content.innerHTML;
+
+  // Match the clone size to the actual skeleton content size
+  const sRect = skeleton.getBoundingClientRect();
+  const padLeft = 40; const padTop = 36;
+  clone.style.width  = (sRect.width - padLeft * 2) + 'px';
+  clone.style.height = (sRect.height - padTop - 36) + 'px';
+
+  pickRandomTarget();
+  cloneReady = true;
+  magRAF = requestAnimationFrame(magLoop);
+}
+
+function stopMagnifier() {
+  if (magRAF) { cancelAnimationFrame(magRAF); magRAF = null; }
+  cloneReady = false;
+}
+
+function magLoop() {
+  if (!cloneReady) return;
+
+  // Smooth lerp toward target
+  magX += (targetX - magX) * LERP_SPD;
+  magY += (targetY - magY) * LERP_SPD;
+
+  // Check if close enough to dwell, then move on
+  const dist = Math.hypot(targetX - magX, targetY - magY);
+  if (dist < 3) {
+    dwellFrames++;
+    if (dwellFrames > 45) { // dwell briefly before moving randomly again
+      dwellFrames = 0;
+      pickRandomTarget();
+    }
+  }
+
+  // Position the magnifier-wrap so its centre (LENS_R, LENS_R) is at (magX, magY)
+  const wrap = document.getElementById('magnifier-wrap');
+  wrap.style.left = (magX - LENS_R) + 'px';
+  wrap.style.top  = (magY - LENS_R) + 'px';
+
+  // Update zoom clone transform so the content under (magX, magY) is centred in lens
+  // After scale(ZOOM) from origin 0,0: point (magX,magY) → (magX*ZOOM, magY*ZOOM)
+  // We want that at (LENS_R, LENS_R) inside the lens-clip
+  const zoomLeft = LENS_R - magX * ZOOM;
+  const zoomTop  = LENS_R - magY * ZOOM;
+  const clone = document.getElementById('lens-clone');
+  clone.style.transform = `scale(${ZOOM})`;
+  clone.style.transformOrigin = '0 0';
+  clone.style.left = zoomLeft + 'px';
+  clone.style.top  = zoomTop  + 'px';
+
+  magRAF = requestAnimationFrame(magLoop);
+}
+
+
+
+</script>
+</body>
+</html>

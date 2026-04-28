@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpportunityTracker — University Placement Platform</title>
+  <meta name="description" content="Centralized internship and placement management for university departments.">
+  <link rel="stylesheet" href="css/styles.css?v=2">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+
+<body>
+
+  <div class="app-layout">
+
+    <!-- ═══════ SIDEBAR ═══════ -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-row">
+          <div class="logo-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="4" />
+            </svg>
+          </div>
+          <div>
+            <h2>OpportunityTracker</h2>
+            <span>Track All Opportunities</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a class="nav-item" id="nav-dashboard" href="#" onclick="switchView('dashboard',this);return false;">
+          <i data-lucide="layout-dashboard" width="15" height="15"></i> Dashboard
+        </a>
+        <a class="nav-item" id="nav-opportunities" href="#" onclick="switchView('opportunities',this);return false;">
+          <i data-lucide="briefcase" width="15" height="15"></i> Opportunities
+        </a>
+        <a class="nav-item" href="resume.html">
+          <i data-lucide="file-text" width="15" height="15"></i> Resume
+        </a>
+        <a class="nav-item" href="bookmarks.html">
+          <i data-lucide="bookmark" width="15" height="15"></i> Bookmarks
+        </a>
+        <div class="nav-section-label">Insights</div>
+        <a class="nav-item" id="nav-analytics" href="#" onclick="switchView('analytics',this);return false;">
+          <i data-lucide="bar-chart-2" width="15" height="15"></i> Analytics
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="user-avatar">DC</div>
+          <div class="user-info">
+            <p>Dept. Coordinator</p>
+            <span>CSE · 2025–26</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ═══════ MAIN CONTENT ═══════ -->
+    <main class="main-content">
+
+      <!-- ─── DASHBOARD VIEW ─── -->
+      <section class="view" id="view-dashboard">
+        <div class="page-header">
+          <h1>Dashboard</h1>
+          <p>Live placement metrics for the current academic semester.</p>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon blue"><i data-lucide="users" width="18" height="18"></i></div>
+            <div class="kpi-value" id="kv-students">248</div>
+            <div class="kpi-label">Total Students</div>
+            <div class="kpi-sub">Enrolled this semester</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon violet"><i data-lucide="trending-up" width="18" height="18"></i></div>
+            <div class="kpi-value" id="kv-placed">76.2%</div>
+            <div class="kpi-label">% Placed</div>
+            <div class="kpi-sub">Above dept. average</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon emerald"><i data-lucide="activity" width="18" height="18"></i></div>
+            <div class="kpi-value" id="kv-active">34</div>
+            <div class="kpi-label">Active Internships</div>
+            <div class="kpi-sub">Across 12 companies</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon sky"><i data-lucide="indian-rupee" width="18" height="18"></i></div>
+            <div class="kpi-value">₹8.4 LPA</div>
+            <div class="kpi-label">Avg. Package</div>
+            <div class="kpi-sub">FY 2025–26</div>
+          </div>
+        </div>
+
+        <div class="analytics-row">
+          <div class="card chart-card">
+            <h3><i data-lucide="bar-chart-2" width="15" height="15" style="color:var(--blue)"></i> Placement Trends —
+              Last 4 Years</h3>
+            <div class="chart-container">
+              <div class="chart-bar-group" data-pct="61">
+                <div class="chart-bar-wrap">
+                  <div class="chart-bar"><span class="chart-bar-pct">61%</span></div>
+                </div>
+                <div class="chart-bar-year">2022</div>
+              </div>
+              <div class="chart-bar-group" data-pct="68">
+                <div class="chart-bar-wrap">
+                  <div class="chart-bar"><span class="chart-bar-pct">68%</span></div>
+                </div>
+                <div class="chart-bar-year">2023</div>
+              </div>
+              <div class="chart-bar-group" data-pct="74">
+                <div class="chart-bar-wrap">
+                  <div class="chart-bar"><span class="chart-bar-pct">74%</span></div>
+                </div>
+                <div class="chart-bar-year">2024</div>
+              </div>
+              <div class="chart-bar-group" data-pct="76">
+                <div class="chart-bar-wrap">
+                  <div class="chart-bar"><span class="chart-bar-pct">76%</span></div>
+                </div>
+                <div class="chart-bar-year">2025</div>
+              </div>
+            </div>
+          </div>
+          <div class="card stats-card">
+            <h3><i data-lucide="zap" width="15" height="15" style="color:var(--amber)"></i> Quick Stats</h3>
+            <div class="stats-item"><span class="stats-item-label">Offers Accepted</span><span
+                class="stats-item-value">189</span></div>
+            <div class="stats-item"><span class="stats-item-label">Pending Offers</span><span
+                class="badge badge-blue">37</span></div>
+            <div class="stats-item"><span class="stats-item-label">Highest Package</span><span
+                class="badge badge-violet">₹26 LPA</span></div>
+            <div class="stats-item"><span class="stats-item-label">Top Recruiter</span><span
+                class="badge badge-emerald">Google</span></div>
+            <div class="stats-item"><span class="stats-item-label">Core CS Placed</span><span
+                class="badge badge-sky">82%</span></div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:20px 24px">
+          <h3 style="font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:7px">
+            <i data-lucide="clock" width="15" height="15" style="color:var(--blue)"></i> Recent Activity
+          </h3>
+          <div class="stats-item"><span class="stats-item-label">Priya Sharma — Google DeepMind Offer</span><span
+              class="badge badge-emerald">Placed</span></div>
+          <div class="stats-item"><span class="stats-item-label">Arjun Rao — Microsoft Interview Round 2</span><span
+              class="badge badge-blue">In Progress</span></div>
+          <div class="stats-item"><span class="stats-item-label">Meera Nair — Razorpay Backend Intern</span><span
+              class="badge badge-gray">Applied</span></div>
+          <div class="stats-item"><span class="stats-item-label">Kunal Verma — Flipkart Shortlisted</span><span
+              class="badge badge-violet">Shortlisted</span></div>
+        </div>
+      </section>
+
+      <!-- ─── OPPORTUNITIES VIEW ─── -->
+      <section class="view" id="view-opportunities">
+        <div class="page-header-row">
+          <div class="page-header" style="margin-bottom:0">
+            <h1>Opportunities</h1>
+            <p>Discover and track the latest internship openings. <span id="job-count-label"
+                style="font-weight:700;color:var(--blue)"></span></p>
+          </div>
+        </div>
+
+        <div class="feed-header" style="margin-top:16px">
+          <div class="search-wrap">
+            <span class="search-icon"><i data-lucide="search" width="14" height="14"></i></span>
+            <input class="search-input" id="search-input" type="text"
+              placeholder="Search companies, roles, or skills..." oninput="onSearch(this.value)" autocomplete="off">
+          </div>
+          <div class="sort-pills">
+            <button class="sort-pill active" id="sort-salary" onclick="setSort('salary',this)">💰 Salary</button>
+            <button class="sort-pill" id="sort-duration" onclick="setSort('duration',this)">📅 Duration</button>
+            <button class="sort-pill" id="sort-recent" onclick="setSort('recent',this)">🕐 Recentness</button>
+          </div>
+          <button class="logic-btn" id="logic-btn" onclick="findNewOpportunities()">
+            <i data-lucide="zap" width="14" height="14"></i>
+            Find New Opportunities
+          </button>
+        </div>
+
+        <div class="progress-bar-wrap" id="progress-bar-wrap">
+          <div class="progress-bar-label">
+            <i data-lucide="loader" width="13" height="13"></i>
+            <span id="progress-label">Scanning database...</span>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progress-fill"></div>
+          </div>
+        </div>
+
+        <div class="feed-container" id="job-feed"></div>
+      </section>
+
+      <!-- ─── ANALYTICS VIEW ─── -->
+      <section class="view" id="view-analytics">
+        <div class="page-header">
+          <h1>Analytics</h1>
+          <p>Deep placement performance insights.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div class="card" style="padding:22px 24px">
+            <h3 style="font-size:14px;font-weight:700;margin-bottom:16px">Branch-Wise Placements</h3>
+            <div class="stats-item"><span class="stats-item-label">Computer Science</span><span
+                class="badge badge-emerald">92%</span></div>
+            <div class="stats-item"><span class="stats-item-label">Electronics & Comm</span><span
+                class="badge badge-blue">78%</span></div>
+            <div class="stats-item"><span class="stats-item-label">Mechanical</span><span
+                class="badge badge-amber">61%</span></div>
+            <div class="stats-item"><span class="stats-item-label">Civil</span><span class="badge badge-gray">54%</span>
+            </div>
+          </div>
+          <div class="card" style="padding:22px 24px">
+            <h3 style="font-size:14px;font-weight:700;margin-bottom:16px">Salary Distribution</h3>
+            <div class="stats-item"><span class="stats-item-label">> ₹20 LPA</span><span class="stats-item-value">23
+                students</span></div>
+            <div class="stats-item"><span class="stats-item-label">₹15–20 LPA</span><span class="stats-item-value">41
+                students</span></div>
+            <div class="stats-item"><span class="stats-item-label">₹10–15 LPA</span><span class="stats-item-value">68
+                students</span></div>
+            <div class="stats-item"><span class="stats-item-label">₹6–10 LPA</span><span class="stats-item-value">57
+                students</span></div>
+          </div>
+        </div>
+        <div class="card" style="padding:22px 24px">
+          <h3 style="font-size:14px;font-weight:700;margin-bottom:14px">Top Recruiting Companies</h3>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <span class="badge badge-emerald">Google (12)</span>
+            <span class="badge badge-blue">Microsoft (9)</span>
+            <span class="badge badge-violet">Flipkart (8)</span>
+            <span class="badge badge-sky">Razorpay (7)</span>
+            <span class="badge badge-amber">Amazon (6)</span>
+            <span class="badge badge-gray">Others (72)</span>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ─── Job Detail Panel ─── -->
+  <div class="detail-overlay" id="detail-overlay" onclick="closeDetail()"></div>
+  <div class="detail-panel" id="detail-panel">
+    <div class="detail-header-band" id="detail-header-band">
+      <button class="detail-close" onclick="closeDetail()">✕</button>
+      <div class="detail-logo-row">
+        <div class="detail-logo" id="detail-logo">GD</div>
+        <div>
+          <div class="detail-role-title" id="detail-role-title">Role</div>
+          <div class="detail-company-name">
+            <i data-lucide="building-2" width="11" height="11"></i>
+            <span id="detail-company-name">Company</span>
+          </div>
+        </div>
+      </div>
+      <div class="detail-meta-chips" id="detail-meta-chips"></div>
+    </div>
+    <div class="detail-body">
+      <!-- Match Score (if resume analyzed) -->
+      <div id="detail-match-section" style="display:none" class="detail-match-bar-wrap">
+        <div class="detail-match-label">
+          <span>Your Resume Match</span>
+          <strong id="detail-match-pct">0%</strong>
+        </div>
+        <div class="match-track">
+          <div class="match-fill" id="detail-match-fill"></div>
+        </div>
+        <div class="matched-skills-row" id="detail-matched-skills"></div>
+      </div>
+      <!-- About -->
+      <div class="detail-section">
+        <h4>About this Role</h4>
+        <p id="detail-desc">—</p>
+      </div>
+      <!-- Responsibilities -->
+      <div class="detail-section">
+        <h4>Key Responsibilities</h4>
+        <ul id="detail-resp"></ul>
+      </div>
+      <!-- Requirements -->
+      <div class="detail-section">
+        <h4>Requirements</h4>
+        <ul id="detail-req"></ul>
+      </div>
+      <!-- Skills -->
+      <div class="detail-section">
+        <h4>Required Skills</h4>
+        <div class="skills-cloud" id="detail-skills"></div>
+      </div>
+    </div>
+    <div class="detail-actions">
+      <button class="btn-primary" id="detail-apply-btn" onclick="applyToJob()">
+        <i data-lucide="send" width="14" height="14" style="display:inline;vertical-align:middle;margin-right:6px"></i>
+        Apply Now
+      </button>
+      <button class="btn-compare" id="detail-compare-btn" onclick="openCompare()">
+        <i data-lucide="git-compare" width="14" height="14" style="display:inline;vertical-align:middle;margin-right:5px"></i>
+        Compare
+      </button>
+      <button class="btn-secondary" id="detail-bm-btn" onclick="toggleDetailBookmark()">
+        <i data-lucide="bookmark" width="14" height="14"
+          style="display:inline;vertical-align:middle;margin-right:4px"></i>
+        Save
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── Cooldown Modal ─── -->
+  <div class="modal-backdrop" id="cooldown-modal" onclick="if(event.target===this)closeModal()">
+    <div class="modal-card">
+      <div class="modal-icon"><i data-lucide="clock" width="24" height="24"></i></div>
+      <h2>Sync Cooldown Active</h2>
+      <p>The placement database syncs <strong>every hour</strong>. Next sync available in <strong
+          id="countdown-text">—</strong>. Check back soon!</p>
+      <button class="modal-action-btn" onclick="closeModal()">Got it</button>
+    </div>
+  </div>
+
+  <!-- ─── Compare / Gap Analysis Modal ─── -->
+  <div class="modal-backdrop" id="compare-modal" onclick="if(event.target===this)closeCompare()">
+    <div class="modal-card" style="max-width:560px;text-align:left;padding:0;overflow:hidden">
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,var(--blue-dark),var(--blue-medium));padding:24px 28px 20px;position:relative">
+        <button onclick="closeCompare()" style="position:absolute;right:16px;top:16px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.2);border:none;cursor:pointer;color:white;font-size:16px;font-weight:700;line-height:1">✕</button>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+          <div id="cmp-logo" style="width:46px;height:46px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;border:2px solid rgba(255,255,255,0.3);flex-shrink:0"></div>
+          <div>
+            <div style="font-size:17px;font-weight:800;color:white" id="cmp-role">Role</div>
+            <div style="font-size:12.5px;color:rgba(255,255,255,0.7)" id="cmp-company">Company</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:13px;color:rgba(255,255,255,0.8);font-weight:600">Resume Match Score</span>
+          <strong style="font-size:22px;font-weight:900;color:white" id="cmp-score">—</strong>
+        </div>
+        <div style="height:6px;background:rgba(255,255,255,0.15);border-radius:3px;margin-top:8px;overflow:hidden">
+          <div id="cmp-bar" style="height:100%;border-radius:3px;background:white;width:0%;transition:width 1s var(--spring)"></div>
+        </div>
+      </div>
+      <!-- Body -->
+      <div style="padding:22px 28px;display:grid;grid-template-columns:1fr 1fr;gap:18px">
+        <!-- What you have -->
+        <div>
+          <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--emerald);margin-bottom:10px;display:flex;align-items:center;gap:6px">
+            <i data-lucide="check-circle" width="13" height="13"></i> What You Bring
+          </div>
+          <div id="cmp-have" style="display:flex;flex-direction:column;gap:7px"></div>
+        </div>
+        <!-- What's missing -->
+        <div>
+          <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--rose);margin-bottom:10px;display:flex;align-items:center;gap:6px">
+            <i data-lucide="x-circle" width="13" height="13"></i> Skill Gaps
+          </div>
+          <div id="cmp-missing" style="display:flex;flex-direction:column;gap:7px"></div>
+        </div>
+      </div>
+      <!-- Advice banner -->
+      <div id="cmp-advice" style="margin:0 28px 24px;padding:14px 16px;border-radius:var(--radius-lg);background:var(--blue-soft);font-size:13px;color:var(--blue-dark);font-weight:600;line-height:1.6"></div>
+    </div>
+  </div>
+
+  <!-- ─── Toast ─── -->
+  <div class="toast" id="toast">
+    <div class="toast-dot" id="toast-dot"></div>
+    <span id="toast-msg">Done</span>
+  </div>
+
+  <!-- ─── Scripts ─── -->
+  <script src="js/db.js"></script>
+  <script>
+    // ─── Init ──────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      // Hash-based view switching
+      const hash = window.location.hash.replace('#', '') || 'dashboard';
+      const validViews = ['dashboard', 'opportunities', 'analytics'];
+      const startView = validViews.includes(hash) ? hash : 'dashboard';
+      const navEl = document.getElementById('nav-' + startView);
+      switchView(startView, navEl);
+      animateBars();
+    });
+
+    // ─── View Switcher ─────────────────────────────────────────────────────────
+    function switchView(id, el) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('view-' + id).classList.add('active');
+      if (el) el.classList.add('active');
+      window.location.hash = id;
+      lucide.createIcons();
+      if (id === 'opportunities') enterOpportunitiesTab();
+      if (id === 'dashboard')     enterDashboardTab();
+      if (id === 'analytics')     enterAnalyticsTab();
+    }
+
+    // ─── Dashboard tab animation ──────────────────────────────────────────────
+    function enterDashboardTab() {
+      // Re-trigger popIn on KPI cards
+      document.querySelectorAll('.kpi-card').forEach((c, i) => {
+        c.style.animation = 'none';
+        void c.offsetWidth;
+        c.style.animation = `popIn 0.55s var(--spring) ${i * 75}ms both`;
+      });
+      // Re-trigger chart bars
+      setTimeout(animateBars, 120);
+      // Stagger stats-items on dashboard
+      document.querySelectorAll('#view-dashboard .stats-item').forEach((s, i) => {
+        s.style.animation = 'none';
+        void s.offsetWidth;
+        s.style.animation = `viewFadeIn 0.35s var(--ease) ${i * 45}ms both`;
+      });
+    }
+
+    // ─── Analytics tab animation ──────────────────────────────────────────────
+    function enterAnalyticsTab() {
+      document.querySelectorAll('#view-analytics .card').forEach((c, i) => {
+        c.style.animation = 'none';
+        void c.offsetWidth;
+        c.style.animation = `springIn 0.5s var(--spring) ${i * 90}ms both`;
+      });
+      document.querySelectorAll('#view-analytics .stats-item').forEach((s, i) => {
+        s.style.animation = 'none';
+        void s.offsetWidth;
+        s.style.animation = `viewFadeIn 0.3s var(--ease) ${i * 45}ms both`;
+      });
+      document.querySelectorAll('#view-analytics .badge').forEach((b, i) => {
+        b.style.animation = 'none';
+        void b.offsetWidth;
+        b.style.animation = `popIn 0.4s var(--spring) ${i * 55}ms both`;
+      });
+    }
+
+    // ─── Feed State ───────────────────────────────────────────────────────────
+    let feedJobs = []; let sortMode = 'salary'; let searchQ = ''; let feedLoaded = false;
+    let detailJob = null;
+
+    async function enterOpportunitiesTab() {
+      const container = document.getElementById('job-feed');
+      container.innerHTML = ''; // Start empty for bounce effect
+      
+      const pw = document.getElementById('progress-bar-wrap');
+      const pf = document.getElementById('progress-fill');
+      const pl = document.getElementById('progress-label');
+      pw.classList.add('visible');
+
+      const steps = [
+        { w: '40%', msg: 'Connecting to placement database...' },
+        { w: '80%', msg: 'Fetching live opportunities...' },
+        { w: '100%', msg: 'Synchronizing...' }
+      ];
+      for (let i = 0; i < steps.length; i++) {
+        await new Promise(r => setTimeout(r, 200));
+        pf.style.width = steps[i].w; pl.textContent = steps[i].msg;
+      }
+      
+      await new Promise(r => setTimeout(r, 200));
+      pw.classList.remove('visible'); pf.style.width = '0%';
+
+      if (!feedLoaded) {
+        let jobs = await DB.getJobs();
+        if (!jobs || jobs.length === 0) { jobs = [...DEFAULT_JOBS]; await DB.setJobs(jobs); }
+        feedJobs = jobs; feedLoaded = true;
+      }
+      
+      // Animate all filtered cards entering
+      const visibleCount = applyFilter(feedJobs, searchQ, sortMode).length;
+      renderFeed(feedJobs, visibleCount);
+    }
+
+    // ─── Render ────────────────────────────────────────────────────────────────
+    async function renderFeed(jobs, animateFirst = 0) {
+      const container = document.getElementById('job-feed');
+      const bms = await DB.getBookmarks();
+      const bmIds = new Set(bms.map(b => b.id));
+      const list = applyFilter(jobs, searchQ, sortMode);
+
+      document.getElementById('job-count-label').textContent = `${list.length} role${list.length !== 1 ? 's' : ''} found`;
+
+      if (!list.length) {
+        container.innerHTML = `<div class="empty-state">
+      <i data-lucide="search-x" width="44" height="44"></i>
+      <h3>No results found</h3>
+      <p>Try adjusting your search or sort filter.</p>
+    </div>`;
+        lucide.createIcons(); return;
+      }
+
+      const build = () => {
+        container.innerHTML = '';
+        list.forEach((job, i) => {
+          const card = buildCard(job, bmIds.has(job.id), i < animateFirst ? i : -1);
+          container.appendChild(card);
+        });
+        lucide.createIcons();
+      };
+
+      if (animateFirst > 0 && 'startViewTransition' in document) {
+        document.startViewTransition(build);
+      } else { build(); }
+    }
+
+    // ─── Build Card ───────────────────────────────────────────────────────────
+    function buildCard(job, isBookmarked, animIdx) {
+      const el = document.createElement('div');
+      el.className = 'job-card' + (animIdx >= 0 ? ' entering' : '');
+      if (animIdx >= 0) el.style.animationDelay = (animIdx * 100) + 'ms';
+      el.style.viewTransitionName = 'jc-' + job.id;
+      el.id = 'card-' + job.id;
+
+      const time = job.postedTime || dynamicTime(job.insertedAt || Date.now());
+      const matchBadge = job.match ? `<span class="match-badge">${job.match}% Match</span>` : '';
+      const newBadge = job.new ? `<span class="new-badge">New</span>` : '';
+
+      el.innerHTML = `
+    <div class="job-card-top">
+      <div class="job-card-left" onclick="openDetail('${job.id}')">
+        <div class="job-logo" style="background:${job.bg};color:${job.fg}">${job.initials}</div>
+        <div class="job-info">
+          <div class="job-role">${job.role}</div>
+          <div class="job-company"><i data-lucide="building-2" width="10" height="10"></i>${job.company}${job.location ? ' · ' + job.location : ''}</div>
+        </div>
+      </div>
+      <div class="job-card-right">
+        <button class="bookmark-btn ${isBookmarked ? 'saved' : ''}" onclick="event.stopPropagation();toggleBookmark('${job.id}',this)">
+          <i data-lucide="bookmark" width="16" height="16" ${isBookmarked ? 'style="fill:var(--rose);stroke:var(--rose)"' : ''}></i>
+        </button>
+        <div class="job-salary">${job.salary}</div>
+      </div>
+    </div>
+    <div class="job-card-skills" onclick="openDetail('${job.id}')">${(job.skills || []).map(s => `<span class="skill-tag">${s}</span>`).join('')}</div>
+    <div class="job-card-footer" onclick="openDetail('${job.id}')">
+      <div class="job-meta">
+        <span class="job-meta-item"><i data-lucide="clock" width="10" height="10"></i>${time}</span>
+        <span class="job-meta-item"><i data-lucide="calendar" width="10" height="10"></i>${job.duration}</span>
+        ${job.type ? `<span class="job-meta-item"><i data-lucide="tag" width="10" height="10"></i>${job.type}</span>` : ''}
+      </div>
+      <div class="job-badges">
+        ${newBadge}${matchBadge}
+        <span class="view-detail-hint"><i data-lucide="arrow-right" width="11" height="11"></i>View Details</span>
+      </div>
+    </div>`;
+      return el;
+    }
+
+    // ─── Filter + Sort ─────────────────────────────────────────────────────────
+    function applyFilter(jobs, search, sort) {
+      let list = [...jobs];
+      if (search.trim()) {
+        const q = search.toLowerCase();
+        list = list.filter(j =>
+          j.company.toLowerCase().includes(q) ||
+          j.role.toLowerCase().includes(q) ||
+          (j.skills || []).some(s => s.toLowerCase().includes(q)) ||
+          (j.type || '').toLowerCase().includes(q)
+        );
+      }
+      if (sort === 'salary') list.sort((a, b) => (b.salaryN || 0) - (a.salaryN || 0));
+      if (sort === 'duration') list.sort((a, b) => (parseInt(b.duration) || 0) - (parseInt(a.duration) || 0));
+      if (sort === 'recent') list.sort((a, b) => (b.insertedAt || b.postedOrder || 0) - (a.insertedAt || a.postedOrder || 0));
+      return list;
+    }
+
+    function onSearch(q) { searchQ = q; renderFeed(feedJobs); }
+    function setSort(mode, el) {
+      sortMode = mode;
+      document.querySelectorAll('.sort-pill').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      renderFeed(feedJobs);
+    }
+
+    // ─── Find New Opportunities ────────────────────────────────────────────────
+    const COOLDOWN_MS = 60 * 60 * 1000; // 1 hour
+
+    async function findNewOpportunities() {
+      const btn = document.getElementById('logic-btn');
+      const lastFetch = await DB.getLastFetch();
+      const elapsed = Date.now() - lastFetch;
+
+      if (lastFetch > 0 && elapsed < COOLDOWN_MS) {
+        const mins = Math.ceil((COOLDOWN_MS - elapsed) / 60000);
+        document.getElementById('countdown-text').textContent = `${mins} minute${mins !== 1 ? 's' : ''}`;
+        btn.classList.add('shake');
+        setTimeout(() => btn.classList.remove('shake'), 400);
+        document.getElementById('cooldown-modal').classList.add('visible');
+        return;
+      }
+
+      // Loading state
+      btn.classList.add('loading'); btn.textContent = '⏳ Scanning...';
+      const pw = document.getElementById('progress-bar-wrap');
+      const pf = document.getElementById('progress-fill');
+      const pl = document.getElementById('progress-label');
+      pw.classList.add('visible');
+
+      const steps = [
+        { w: '30%', msg: 'Connecting to placement database...' },
+        { w: '55%', msg: 'Fetching live opportunities...' },
+        { w: '78%', msg: 'Scoring against your profile...' },
+        { w: '95%', msg: 'Curating best matches...' },
+      ];
+      for (let i = 0; i < steps.length; i++) {
+        await new Promise(r => setTimeout(r, 350));
+        pf.style.width = steps[i].w; pl.textContent = steps[i].msg;
+      }
+
+      await new Promise(r => setTimeout(r, 400));
+      pw.classList.remove('visible'); pf.style.width = '0%';
+
+      const existingIds = new Set(feedJobs.map(j => j.id));
+      const picks = await smartPickJobs(existingIds, 4);
+
+      const newJobs = picks.map((j, i) => ({
+        ...j,
+        new: true,
+        insertedAt: Date.now() - i * 30000,
+        postedTime: i === 0 ? 'Just Now' : `${(i + 1) * 2} mins ago`,
+      }));
+
+      feedJobs = [...newJobs, ...feedJobs];
+      await DB.setJobs(feedJobs);
+      await DB.setLastFetch(Date.now());
+
+      btn.classList.remove('loading');
+      btn.innerHTML = '<i data-lucide="zap" width="14" height="14"></i> Find New Opportunities';
+      lucide.createIcons();
+
+      await renderFeed(feedJobs, newJobs.length);
+      showToast(`✨ ${newJobs.length} new opportunities added!`);
+    }
+
+    function closeModal() { document.getElementById('cooldown-modal').classList.remove('visible'); }
+
+    // ─── Job Detail Panel ──────────────────────────────────────────────────────
+    async function openDetail(jobId) {
+      const job = feedJobs.find(j => j.id === jobId);
+      if (!job) return;
+      detailJob = job;
+
+      // Header
+      const logo = document.getElementById('detail-logo');
+      logo.textContent = job.initials;
+      logo.style.background = job.bg; logo.style.color = job.fg;
+      document.getElementById('detail-role-title').textContent = job.role;
+      document.getElementById('detail-company-name').textContent = job.company;
+
+      // Meta chips
+      const chips = document.getElementById('detail-meta-chips');
+      chips.innerHTML = [
+        `<span class="detail-chip">💰 ${job.salary}</span>`,
+        `<span class="detail-chip">📅 ${job.duration}</span>`,
+        job.location ? `<span class="detail-chip">📍 ${job.location}</span>` : '',
+        job.type ? `<span class="detail-chip">🏷️ ${job.type}</span>` : '',
+      ].join('');
+
+      // Match section
+      const resumeData = await DB.getResumeSkills();
+      const matchSection = document.getElementById('detail-match-section');
+      if (resumeData && resumeData.text) {
+        const m = computeMatchScore(resumeData.text, job);
+        matchSection.style.display = 'block';
+        document.getElementById('detail-match-pct').textContent = m.score + '%';
+        document.getElementById('detail-match-fill').style.width = m.score + '%';
+        const skillsRow = document.getElementById('detail-matched-skills');
+        skillsRow.innerHTML = [
+          ...m.matchedSkills.map(s => `<span class="matched-skill found">✓ ${s}</span>`),
+          ...m.missingSkills.map(s => `<span class="matched-skill missing">${s}</span>`),
+        ].join('');
+      } else {
+        matchSection.style.display = 'none';
+      }
+
+      // Description
+      document.getElementById('detail-desc').textContent = job.description || makeDesc(job);
+
+      // Responsibilities
+      const resp = job.responsibilities || makeResp(job);
+      document.getElementById('detail-resp').innerHTML = resp.map(r => `<li>${r}</li>`).join('');
+
+      // Requirements
+      const reqs = job.requirements || makeReqs(job);
+      document.getElementById('detail-req').innerHTML = reqs.map(r => `<li>${r}</li>`).join('');
+
+      // Skills
+      const skillsEl = document.getElementById('detail-skills');
+      skillsEl.innerHTML = (job.skills || []).map(s => `<span class="skill-tag">${s}</span>`).join('');
+
+      // Bookmark button
+      const isBookmarked = await DB.isBookmarked(jobId);
+      const bmBtn = document.getElementById('detail-bm-btn');
+      bmBtn.innerHTML = isBookmarked
+        ? '<i data-lucide="bookmark" width="14" height="14" style="fill:var(--rose);stroke:var(--rose);display:inline;vertical-align:middle;margin-right:4px"></i> Saved'
+        : '<i data-lucide="bookmark" width="14" height="14" style="display:inline;vertical-align:middle;margin-right:4px"></i> Save';
+      bmBtn.style.color = isBookmarked ? 'var(--rose)' : '';
+
+      // Open
+      document.getElementById('detail-overlay').classList.add('visible');
+      document.getElementById('detail-panel').classList.add('open');
+      lucide.createIcons();
+    }
+
+    function closeDetail() {
+      document.getElementById('detail-overlay').classList.remove('visible');
+      document.getElementById('detail-panel').classList.remove('open');
+    }
+
+    async function toggleDetailBookmark() {
+      if (!detailJob) return;
+      const added = await DB.toggleBookmark(detailJob);
+      const btn = document.getElementById('detail-bm-btn');
+      btn.innerHTML = added
+        ? '<i data-lucide="bookmark" width="14" height="14" style="fill:var(--rose);stroke:var(--rose);display:inline;vertical-align:middle;margin-right:4px"></i> Saved'
+        : '<i data-lucide="bookmark" width="14" height="14" style="display:inline;vertical-align:middle;margin-right:4px"></i> Save';
+      btn.style.color = added ? 'var(--rose)' : '';
+      // Sync card bookmark icon
+      const cardBtn = document.querySelector(`#card-${detailJob.id} .bookmark-btn`);
+      if (cardBtn) {
+        cardBtn.classList.toggle('saved', added);
+        const icon = cardBtn.querySelector('svg');
+        if (icon) { icon.style.fill = added ? 'var(--rose)' : 'none'; icon.style.stroke = added ? 'var(--rose)' : 'currentColor'; }
+      }
+      showToast(added ? '🔖 Job bookmarked!' : '🗑️ Bookmark removed', added);
+      lucide.createIcons();
+    }
+
+    function applyToJob() {
+      if (!detailJob) return;
+      showToast(`🚀 Opening application for ${detailJob.company}...`);
+    }
+
+    // ─── Compare / Gap Analysis ────────────────────────────────────────────────
+    async function openCompare() {
+      if (!detailJob) return;
+      const modal = document.getElementById('compare-modal');
+
+      // Header
+      const logo = document.getElementById('cmp-logo');
+      logo.textContent = detailJob.initials;
+      logo.style.background = detailJob.bg;
+      logo.style.color = detailJob.fg;
+      document.getElementById('cmp-role').textContent    = detailJob.role;
+      document.getElementById('cmp-company').textContent = detailJob.company;
+
+      const resumeData = await DB.getResumeSkills();
+      if (!resumeData || !resumeData.text) {
+        showToast('⚠️ Upload a resume first to compare!');
+        return;
+      }
+
+      const m = computeMatchScore(resumeData.text, detailJob);
+      document.getElementById('cmp-score').textContent = m.score + '%';
+      setTimeout(() => { document.getElementById('cmp-bar').style.width = m.score + '%'; }, 100);
+
+      // What you have
+      const haveEl = document.getElementById('cmp-have');
+      haveEl.innerHTML = '';
+      if (m.matchedSkills.length) {
+        m.matchedSkills.forEach((s, i) => {
+          const d = document.createElement('div');
+          d.style.cssText = `display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;background:var(--emerald-soft);font-size:12.5px;font-weight:600;color:var(--emerald);animation:springIn 0.4s var(--spring) ${i*60}ms both`;
+          d.innerHTML = `<span style="font-size:13px">✓</span> ${s}`;
+          haveEl.appendChild(d);
+        });
+      } else {
+        haveEl.innerHTML = '<p style="font-size:12.5px;color:var(--text-muted)">No direct skill matches found.</p>';
+      }
+
+      // What's missing
+      const missingEl = document.getElementById('cmp-missing');
+      missingEl.innerHTML = '';
+      if (m.missingSkills.length) {
+        m.missingSkills.forEach((s, i) => {
+          const d = document.createElement('div');
+          d.style.cssText = `display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;background:var(--rose-soft);font-size:12.5px;font-weight:600;color:var(--rose);animation:springIn 0.4s var(--spring) ${i*60}ms both`;
+          d.innerHTML = `<span style="font-size:13px">✗</span> ${s}`;
+          missingEl.appendChild(d);
+        });
+      } else {
+        missingEl.innerHTML = '<p style="font-size:12.5px;color:var(--emerald)">✅ You match all required skills!</p>';
+      }
+
+      // Smart advice
+      const gap = m.missingSkills.length;
+      const top3 = m.missingSkills.slice(0,3);
+      let advice = '';
+      if (m.score >= 85) {
+        advice = `🎯 You're an excellent fit! You match ${m.matchedSkills.length} of ${m.totalSkills} required skills. Apply with confidence.`;
+      } else if (m.score >= 65) {
+        advice = `📈 You're ${m.score}% there. Adding <strong>${top3.join(', ')}</strong> to a project or certification could push you to an 85%+ match.`;
+      } else if (gap > 0) {
+        advice = `🛠️ You're missing ${gap} key skill${gap!==1?'s':''}. Focus on <strong>${top3.slice(0,2).join(' & ')}</strong> — these appear most often in similar roles and can be learned via a short online course.`;
+      } else {
+        advice = `📝 Your resume keywords need to align better with this job's language. Try mirroring the phrasing in the role description when writing your experience bullets.`;
+      }
+      document.getElementById('cmp-advice').innerHTML = advice;
+
+      modal.classList.add('visible');
+      lucide.createIcons();
+    }
+
+    function closeCompare() { document.getElementById('compare-modal').classList.remove('visible'); }
+
+    // ─── Bookmark in Feed Card ─────────────────────────────────────────────────
+    async function toggleBookmark(jobId, btn) {
+      const job = feedJobs.find(j => j.id === jobId);
+      if (!job) return;
+      const added = await DB.toggleBookmark(job);
+      btn.classList.toggle('saved', added);
+      const icon = btn.querySelector('svg');
+      if (icon) { icon.style.fill = added ? 'var(--rose)' : 'none'; icon.style.stroke = added ? 'var(--rose)' : 'currentColor'; }
+      btn.style.transform = 'scale(1.5)';
+      setTimeout(() => { btn.style.transform = ''; }, 200);
+      showToast(added ? '🔖 Bookmarked!' : '🗑️ Removed', added);
+    }
+
+    // ─── Chart Bars ────────────────────────────────────────────────────────────
+    function animateBars() {
+      const maxH = 110;
+      document.querySelectorAll('.chart-bar-group').forEach((g, i) => {
+        const pct = parseFloat(g.dataset.pct);
+        const bar = g.querySelector('.chart-bar');
+        setTimeout(() => { bar.style.height = (pct / 100 * maxH) + 'px'; }, 200 + i * 100);
+      });
+    }
+
+    // ─── Toast ────────────────────────────────────────────────────────────────
+    let toastTimer;
+    function showToast(msg, isRose) {
+      const t = document.getElementById('toast');
+      const d = document.getElementById('toast-dot');
+      document.getElementById('toast-msg').textContent = msg;
+      d.className = 'toast-dot' + (isRose ? ' rose' : '');
+      t.classList.add('visible');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('visible'), 2800);
+    }
+  </script>
+</body>
+
+</html>

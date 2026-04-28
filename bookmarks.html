@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saved Opportunities — OpportunityTracker</title>
+  <meta name="description" content="Your bookmarked internship opportunities with analytics.">
+  <link rel="stylesheet" href="css/styles.css?v=2">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+
+<body>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-row">
+          <div class="logo-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="4" />
+            </svg>
+          </div>
+          <div>
+            <h2>OpportunityTracker</h2><span>Track All Opportunities</span>
+          </div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a class="nav-item" href="index.html#dashboard"><i data-lucide="layout-dashboard" width="15" height="15"></i>
+          Dashboard</a>
+        <a class="nav-item" href="index.html#opportunities"><i data-lucide="briefcase" width="15" height="15"></i>
+          Opportunities</a>
+        <a class="nav-item" href="resume.html"><i data-lucide="file-text" width="15" height="15"></i> Resume</a>
+        <a class="nav-item active" href="bookmarks.html"><i data-lucide="bookmark" width="15" height="15"></i>
+          Bookmarks</a>
+        <div class="nav-section-label">Insights</div>
+        <a class="nav-item" href="index.html#analytics"><i data-lucide="bar-chart-2" width="15" height="15"></i>
+          Analytics</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="user-avatar">DC</div>
+          <div class="user-info">
+            <p>Dept. Coordinator</p><span>CSE · 2025–26</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <!-- Header -->
+      <div class="page-header-row">
+        <div class="page-header" style="margin-bottom:0">
+          <h1>Saved Opportunities</h1>
+          <p>Jobs you've bookmarked for review and application.</p>
+        </div>
+        <span class="badge badge-rose" id="bm-count-badge" style="font-size:13px;padding:6px 16px">0 Saved</span>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="filter-tabs" id="filter-tabs">
+        <button class="filter-tab active" onclick="filterBm('all',this)">All</button>
+        <button class="filter-tab" onclick="filterBm('research',this)">Research</button>
+        <button class="filter-tab" onclick="filterBm('fintech',this)">Fintech</button>
+        <button class="filter-tab" onclick="filterBm('data',this)">Data</button>
+        <button class="filter-tab" onclick="filterBm('mobile',this)">Mobile</button>
+        <button class="filter-tab" onclick="filterBm('saas',this)">SaaS</button>
+      </div>
+
+      <!-- Two-column layout -->
+      <div class="bookmarks-layout" id="bookmarks-layout">
+        <div class="bookmarks-grid" id="bookmarks-grid"></div>
+        <div class="card analytics-widget">
+          <h3 style="font-size:14px;font-weight:700">
+            <i data-lucide="bar-chart-2" width="14" height="14" style="color:var(--blue)"></i>
+            Bookmark Analytics
+          </h3>
+          <div class="widget-stat">
+            <div class="widget-stat-value" id="w-total">0</div>
+            <div class="widget-stat-label">Total Saved</div>
+          </div>
+          <div class="widget-stat">
+            <div class="widget-stat-value" id="w-avg-salary" style="color:var(--violet)">₹—</div>
+            <div class="widget-stat-label">Avg. Salary</div>
+          </div>
+          <div class="widget-stat">
+            <div class="widget-stat-value" id="w-top-type" style="color:var(--sky)">—</div>
+            <div class="widget-stat-label">Top Category</div>
+          </div>
+          <div class="widget-stat" style="border-bottom:none">
+            <div class="widget-stat-value" id="w-best-match" style="color:var(--emerald)">—</div>
+            <div class="widget-stat-label">Best Match Company</div>
+          </div>
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+            <p style="font-size:12.5px;color:var(--text-secondary);line-height:1.7" id="w-tip">Save some jobs from the
+              Opportunities tab to see analytics here.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" id="empty-state" style="display:none">
+        <i data-lucide="bookmark-x" width="52" height="52"></i>
+        <h3>No saved opportunities</h3>
+        <p>Click the bookmark icon on any job in Opportunities to save it here.</p>
+        <a href="index.html#opportunities"
+          style="margin-top:14px;padding:10px 22px;border-radius:var(--radius-lg);background:linear-gradient(135deg,var(--blue-dark),var(--blue-medium));color:white;font-weight:700;text-decoration:none;font-size:13.5px;box-shadow:var(--shadow-btn)">
+          Browse Opportunities
+        </a>
+      </div>
+    </main>
+  </div>
+
+  <!-- Detail Panel (reused on bookmarks page too) -->
+  <div class="detail-overlay" id="detail-overlay" onclick="closeDetail()"></div>
+  <div class="detail-panel" id="detail-panel">
+    <div class="detail-header-band" id="detail-header-band">
+      <button class="detail-close" onclick="closeDetail()">✕</button>
+      <div class="detail-logo-row">
+        <div class="detail-logo" id="detail-logo">GD</div>
+        <div>
+          <div class="detail-role-title" id="detail-role-title">Role</div>
+          <div class="detail-company-name"><i data-lucide="building-2" width="11" height="11"></i><span
+              id="detail-company-name">Company</span></div>
+        </div>
+      </div>
+      <div class="detail-meta-chips" id="detail-meta-chips"></div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-section">
+        <h4>About this Role</h4>
+        <p id="detail-desc">—</p>
+      </div>
+      <div class="detail-section">
+        <h4>Key Responsibilities</h4>
+        <ul id="detail-resp"></ul>
+      </div>
+      <div class="detail-section">
+        <h4>Requirements</h4>
+        <ul id="detail-req"></ul>
+      </div>
+      <div class="detail-section">
+        <h4>Required Skills</h4>
+        <div class="skills-cloud" id="detail-skills"></div>
+      </div>
+    </div>
+    <div class="detail-actions">
+      <button class="btn-primary">Apply Now</button>
+      <button class="btn-secondary" onclick="removeCurrentBookmark()">
+        <i data-lucide="trash-2" width="13" height="13"
+          style="display:inline;vertical-align:middle;margin-right:4px"></i>
+        Remove
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <div class="toast-dot rose"></div>
+    <span id="toast-msg">Done</span>
+  </div>
+
+  <script src="js/db.js"></script>
+  <script>
+    let allBookmarks = []; let activeFilter = 'all'; let detailJob = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      lucide.createIcons();
+      await loadBookmarks();
+    });
+
+    async function loadBookmarks() {
+      allBookmarks = await DB.getBookmarks();
+      render(allBookmarks);
+      updateWidget(allBookmarks);
+    }
+
+    function filterBm(type, el) {
+      activeFilter = type;
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      const filtered = type === 'all' ? allBookmarks : allBookmarks.filter(j => (j.type || '').toLowerCase() === type.toLowerCase());
+      render(filtered);
+    }
+
+    function render(jobs) {
+      const grid = document.getElementById('bookmarks-grid');
+      const empty = document.getElementById('empty-state');
+      const layout = document.getElementById('bookmarks-layout');
+      document.getElementById('bm-count-badge').textContent = `${allBookmarks.length} Saved`;
+
+      if (allBookmarks.length === 0) {
+        layout.style.display = 'none'; empty.style.display = 'flex';
+        return;
+      }
+      layout.style.display = 'grid'; empty.style.display = 'none';
+
+      if (jobs.length === 0) {
+        grid.innerHTML = '<div class="empty-state" style="min-height:200px"><p>No jobs in this category.</p></div>';
+        return;
+      }
+
+      grid.innerHTML = '';
+      jobs.forEach((job, i) => {
+        const card = buildBmCard(job, i);
+        grid.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    function buildBmCard(job, i) {
+      const el = document.createElement('div');
+      el.className = 'job-card entering';
+      el.style.animationDelay = (i * 80) + 'ms';
+      el.style.viewTransitionName = 'bmc-' + job.id;
+      el.id = 'bmcard-' + job.id;
+
+      const time = job.postedTime || 'Saved recently';
+      el.innerHTML = `
+    <div class="job-card-top">
+      <div class="job-card-left" onclick="openDetail('${job.id}')">
+        <div class="job-logo" style="background:${job.bg || '#1d4ed8'};color:${job.fg || '#fff'}">${job.initials}</div>
+        <div class="job-info">
+          <div class="job-role">${job.role}</div>
+          <div class="job-company"><i data-lucide="building-2" width="10" height="10"></i>${job.company}${job.location ? ' · ' + job.location : ''}</div>
+        </div>
+      </div>
+      <div class="job-card-right">
+        <button class="bookmark-btn saved" onclick="removeBookmark('${job.id}',this)" title="Remove bookmark">
+          <i data-lucide="bookmark" width="16" height="16" style="fill:var(--rose);stroke:var(--rose)"></i>
+        </button>
+        <div class="job-salary">${job.salary}</div>
+      </div>
+    </div>
+    <div class="job-card-skills" onclick="openDetail('${job.id}')">${(job.skills || []).map(s => `<span class="skill-tag">${s}</span>`).join('')}</div>
+    <div class="job-card-footer">
+      <div class="job-meta">
+        <span class="job-meta-item"><i data-lucide="clock" width="10" height="10"></i>${time}</span>
+        <span class="job-meta-item"><i data-lucide="calendar" width="10" height="10"></i>${job.duration}</span>
+        ${job.type ? `<span class="job-meta-item"><i data-lucide="tag" width="10" height="10"></i>${job.type}</span>` : ''}
+      </div>
+      <div class="job-badges">
+        ${job.new ? '<span class="new-badge">New</span>' : ''}
+        ${job.match ? `<span class="match-badge">${job.match}% Match</span>` : ''}
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+      <button onclick="showToast('🚀 Opening application for ${job.company}...')" style="flex:1;padding:8px 0;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--blue-dark),var(--blue-medium));border:none;color:white;font-family:Inter,sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:var(--shadow-btn)">Apply Now</button>
+      <button onclick="removeBookmark('${job.id}')" style="padding:8px 14px;border-radius:var(--radius-md);background:var(--bg);border:1.5px solid var(--border);color:var(--text-muted);font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer">Remove</button>
+    </div>`;
+      return el;
+    }
+
+    async function removeBookmark(jobId) {
+      let bm = await DB.getBookmarks();
+      bm = bm.filter(j => j.id !== jobId);
+      await DB.setBookmarks(bm);
+      allBookmarks = bm;
+
+      const card = document.getElementById('bmcard-' + jobId);
+      if (card) {
+        if ('startViewTransition' in document) {
+          document.startViewTransition(() => {
+            card.style.transform = 'scale(0.88)';
+            card.style.opacity = '0';
+            card.style.filter = 'blur(6px)';
+            card.style.transition = 'all 0.25s var(--ease)';
+          });
+        }
+        setTimeout(() => {
+          const filtered = activeFilter === 'all' ? allBookmarks : allBookmarks.filter(j => (j.type || '').toLowerCase() === activeFilter);
+          render(filtered);
+          updateWidget(allBookmarks);
+        }, 280);
+      }
+      showToast('🗑️ Bookmark removed');
+    }
+
+    function openDetail(jobId) {
+      const job = allBookmarks.find(j => j.id === jobId);
+      if (!job) return;
+      detailJob = job;
+
+      document.getElementById('detail-logo').textContent = job.initials;
+      document.getElementById('detail-logo').style.background = job.bg || '#1d4ed8';
+      document.getElementById('detail-logo').style.color = job.fg || '#fff';
+      document.getElementById('detail-role-title').textContent = job.role;
+      document.getElementById('detail-company-name').textContent = job.company;
+      document.getElementById('detail-meta-chips').innerHTML = [
+        `<span class="detail-chip">💰 ${job.salary}</span>`,
+        `<span class="detail-chip">📅 ${job.duration}</span>`,
+        job.location ? `<span class="detail-chip">📍 ${job.location}</span>` : '',
+        job.type ? `<span class="detail-chip">🏷️ ${job.type}</span>` : '',
+      ].join('');
+      document.getElementById('detail-desc').textContent = job.description || makeDesc(job);
+      document.getElementById('detail-resp').innerHTML = (job.responsibilities || makeResp(job)).map(r => `<li>${r}</li>`).join('');
+      document.getElementById('detail-req').innerHTML = (job.requirements || makeReqs(job)).map(r => `<li>${r}</li>`).join('');
+      document.getElementById('detail-skills').innerHTML = (job.skills || []).map(s => `<span class="skill-tag">${s}</span>`).join('');
+
+      document.getElementById('detail-overlay').classList.add('visible');
+      document.getElementById('detail-panel').classList.add('open');
+      lucide.createIcons();
+    }
+
+    function removeCurrentBookmark() {
+      if (!detailJob) return;
+      closeDetail();
+      removeBookmark(detailJob.id);
+    }
+
+    function closeDetail() {
+      document.getElementById('detail-overlay').classList.remove('visible');
+      document.getElementById('detail-panel').classList.remove('open');
+    }
+
+    function updateWidget(jobs) {
+      document.getElementById('w-total').textContent = jobs.length;
+      if (!jobs.length) { document.getElementById('w-tip').textContent = 'Save some jobs to see analytics here.'; return; }
+      const avg = (jobs.reduce((s, j) => s + (j.salaryN || 0), 0) / jobs.length).toFixed(1);
+      document.getElementById('w-avg-salary').textContent = `₹${avg} LPA`;
+      const typeMap = {};
+      jobs.forEach(j => { const t = j.type || 'Other'; typeMap[t] = (typeMap[t] || 0) + 1; });
+      const top = Object.entries(typeMap).sort((a, b) => b[1] - a[1])[0];
+      document.getElementById('w-top-type').textContent = top ? top[0] : '—';
+      const best = [...jobs].sort((a, b) => (b.salaryN || 0) - (a.salaryN || 0))[0];
+      document.getElementById('w-best-match').textContent = best?.company || '—';
+      document.getElementById('w-tip').textContent = `You have ${jobs.length} saved role${jobs.length !== 1 ? 's' : ''} across ${Object.keys(typeMap).length} categories. ${best ? `${best.company} offers the highest salary at ${best.salary}.` : ''}`;
+    }
+
+    let toastTimer;
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      t.classList.add('visible');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('visible'), 2800);
+    }
+  </script>
+</body>
+
+</html>
